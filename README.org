@@ -98,13 +98,13 @@ This script generates metrics for evaluating the model for the generated languag
 - model: Trained language model.
 
 *** Classes:
-- Metrics: Class for interacting with the methods for generating metrics forthe language model.
+- Metrics: Class for interacting with the methods for generating metrics for the language model.
 
 *** Usage:
-Run this script to generate metrics for a trained language model.
+Run this script to generate metrics for the language identification model.
 
 *** Example:
-python3 metrics.py -c 5 -m gaussian_5000 -d big_dataset.csv
+~python3 metrics.py -c 5 -m gaussian_5000 -d big_dataset.csv~
 * Adding corpus data manually
 You can manually add corpora by downloading corpus files from [[https://github.com/giellalt?q=corpus&type=all&language=&sort=][the GiellaTekno Github page]], including additional languages. Follow these steps:
 
