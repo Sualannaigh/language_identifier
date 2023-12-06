@@ -30,8 +30,9 @@ import argparse
 import pickle
 import xml.etree.ElementTree as ET
 import pandas as pd
-
+# Paths to avoid traversing through when locating the corpus files
 AVOID_PATHS = {".git", "tmx", ".gitignore"}
+# Headers for the dataset file
 CSV_HEADER = ["text", "language"]
 
 parser = argparse.ArgumentParser(description='This script collects and processes'
@@ -59,7 +60,7 @@ parser.add_argument(
     help='Sets the name for the dataset, default "datasheet"',
 )
 
-args = parser.parse_args()
+ARGS = parser.parse_args()
 
 
 class Gatherer:
@@ -79,10 +80,11 @@ class Gatherer:
         and saves the data as a csv file. It also pickles the commandline
         arguments so they can be used in logging purposes in model.py
         """
-        self.files = []  # list of tuples which contains the data
+        self.files = []
         self.languages = [
             d for d in os.listdir("data") if os.path.isdir(os.path.join("data", d))
         ]
+        # Sets weights for languages
         self.language_weights = {}
         if (
             input(
@@ -99,18 +101,18 @@ class Gatherer:
             for lang in self.languages:
                 self.language_weights[lang] = float(input(f"Weight of {lang}: "))
         else:
-            # Assign equal weights to all languages
+            # Else assign equal weights to all languages
             for lang in self.languages:
                 self.language_weights[lang] = 1 / len(self.languages)
-        self.data_location = f"data/{args.data}.csv"
+        self.data_location = f"data/{ARGS.data}.csv"
         self.collect_text(self.languages)
         adjusted_df = self.adjust_dataset(self.data_location)
-        adjusted_df.to_csv(f"data/{args.data}.csv")
-        # Pickles commandline arguments so they can be used for logging
+        adjusted_df.to_csv(f"data/{ARGS.data}.csv")
+        # Pickles command-line arguments so they can be used for logging
         if not os.path.exists("pickles"):
             os.makedirs("pickles")
-        with open("pickles/data_args.pickle", "wb") as _args:
-            pickle.dump(args, _args)
+        with open("pickles/data_ARGS.pickle", "wb") as _ARGS:
+            pickle.dump(ARGS, _ARGS)
         print("Finished, you can now train with 'model.py'")
 
     def adjust_dataset(self, data_location: str) -> pd.DataFrame:
@@ -119,17 +121,18 @@ class Gatherer:
         extracts data for the final data set, adjusting the weight of each
         language and shuffling the dataset.
 
-        Args:
+        ARGS:
         - data_location (str): Path to the input CSV file.
 
         Returns:
         - pd.DataFrame: Adjusted dataset.
         """
         print("Tweaking data...")
+        # Load data from csv file and then shuffle it
         data_frame = pd.read_csv(data_location)
-        dataframes = []
+        data_frames = []
         data_frame = data_frame.sample(frac=1).reset_index(drop=True)
-        final_size = args.size
+        final_size = ARGS.size
         # Calculate how much data will be sampled from each language, and
         # check if there is enough data, else reduce datasize.
         decrease_percentage = 1
@@ -147,12 +150,13 @@ class Gatherer:
                         ' requested size)'
                     )
                     final_size *= decrease_percentage
+        # Adjust so the requested amount of data is added to the final file.
         for language in self.languages:
             language_size = int(final_size * self.language_weights[language])
             print(f"Adding {language_size} paragraphs for {language}")
-            dataframes.append(data_frame[data_frame.language == language].head(language_size))
+            data_frames.append(data_frame[data_frame.language == language].head(language_size))
         new_data_frame = pd.DataFrame(columns=CSV_HEADER)
-        for frame in dataframes:
+        for frame in data_frames:
             new_data_frame = pd.concat([new_data_frame, frame], ignore_index=True)
         # Shuffle dataset again and return it
         return new_data_frame.sample(frac=1).reset_index(drop=True)
@@ -162,7 +166,7 @@ class Gatherer:
         Collects text data from xml corpora files for the specified languages
         and outputs it to a csv file.
 
-        Args:
+        ARGS:
         - languages (list): List of languages to include in the dataset.
         """
         with open(self.data_location, "w", encoding="utf-8") as out_file:
@@ -187,7 +191,7 @@ class Gatherer:
         Finds xml files recursively in a given directory, discards directories
         listed in variable _avoidPaths.
 
-        Args:
+        ARGS:
         - input_path (str): Directory path to search for files and directories.
         - current_lang (str): Current language being processed.
         """
@@ -203,7 +207,7 @@ class Gatherer:
         """
         Parses xml files and extracts the content of <p> tags.
 
-        Args:
+        ARGS:
         - input_file (str): Directory path to te xml filed being extracted.
 
         Returns:
@@ -218,7 +222,7 @@ class Gatherer:
         """
         Processes input text by removing unwanted characters and whitespaces.
 
-        Args:
+        ARGS:
         - input_text (str): Input text.
 
         Returns:

@@ -108,11 +108,11 @@ parser.add_argument(
     'supported arguments are "b" (Bernoullian),"g" (Gaussian) and "m"'
     '(Multinomial), default "m"'
 )
-args = parser.parse_args()
+ARGS = parser.parse_args()
 
 # Mappings for the commandline arguments
-vectorizer_dict = {"cv": CountVectorizer, "tf": TfidfVectorizer}
-classifier_dict = {"b": BernoulliNB, "g": GaussianNB, "m": MultinomialNB}
+VECTORIZER_DICT = {"cv": CountVectorizer, "tf": TfidfVectorizer}
+CLASSIFIER_DICT = {"b": BernoulliNB, "g": GaussianNB, "m": MultinomialNB}
 
 
 class Model:
@@ -129,27 +129,27 @@ class Model:
         training mode.
         """
         if (
-            args.vectorizer not in vectorizer_dict
-            or args.classifier not in classifier_dict
+            ARGS.vectorizer not in VECTORIZER_DICT
+            or ARGS.classifier not in CLASSIFIER_DICT
         ):
             print(
                 "Non supported parameter given for vectorizer or classifier"
                 ", make sure you have inputed a correct argument"
             )
             sys.exit(1)
-        self.data_location = args.data
+        self.data_location = ARGS.data
         self.model = None
-        if args.training:
+        if ARGS.training:
             self.model = self.setup_training(self.data_location)
-        if args.predict:
-            print(self.predict(args.predict))
+        if ARGS.predict:
+            print(self.predict(ARGS.predict))
 
     @staticmethod
     def load_data(target_file: str) -> pd.DataFrame:
         """
         Loads data from .csv file and assures it exists
 
-        Args:
+        ARGS:
         - target_file (str): Path to the csv file to load data from.
         
         Returns:
@@ -165,7 +165,7 @@ class Model:
         """
         Measure the performance of the classifier.
 
-        Args:
+        ARGS:
         - input_model (object): Trained naive bayes classifer.
         - test_set (list): List containing training data for text and language.
 
@@ -186,9 +186,9 @@ class Model:
 
     def train_model(self, train_data: np.ndarray, pred_data: np.ndarray) -> Tuple["model", float]:
         """
-        Train the naive bayes classifier.
+        Train the naive bayes classifier and times it.
 
-        Args:
+        ARGS:
         - train_data (numpy.ndarray): Training data, composed of text paragraphs.
         - pred_data (numpy.ndarray): Prediction data, composed of languages.
 
@@ -196,7 +196,7 @@ class Model:
         - Tuple[object, float]: Trained model and time to run model.
         """
         print("Starting training task...")
-        nb_model = classifier_dict[args.classifier]()
+        nb_model = CLASSIFIER_DICT[ARGS.classifier]()
         start = time.time()
         nb_model.fit(train_data, pred_data)
         end = time.time()
@@ -207,7 +207,7 @@ class Model:
         """
         Setup training for the naive bayes classifier.
 
-        Args:
+        ARGS:
         - data_location (str): Path to the input data.
 
         Returns:
@@ -217,22 +217,27 @@ class Model:
         print("Vectorizing data and splitting datasets...")
         language = data["language"]
         encoder = LabelEncoder()
+        # Encode the language labels (targets)
         categories = encoder.fit_transform(language)
-        vectorizer = vectorizer_dict[args.vectorizer](max_features=args.features)
+        vectorizer = VECTORIZER_DICT[ARGS.vectorizer](max_features=ARGS.features)
         vectorized_data = vectorizer.fit_transform(data["text"].values.astype("U"))
+        # Split up the dataset into training, and testing sets for text
+        # and language
         text_train, text_test, language_train, language_test = train_test_split(
             vectorized_data.toarray(), categories, random_state=42
         )
+        # Train model
         nb_model, run_time = self.train_model(text_train, language_train)
         precision, recall = self.measure_classifier(nb_model, [text_test, language_test])
         f_score = round(float(2 * (precision * recall) / (precision + recall)), 4)
         print(f'Fitting model took: {run_time} seconds with a precision of'
               f' {precision}%, recall of {recall}% and f1-score of {f_score}%'
         )
+        # Pickling data to save for other uses within the program
         print("Pickling data...")
         with open("pickles/categories.pickle", "wb") as _categories:
             pickle.dump(categories, _categories)
-        with open(f"pickles/{args.name}.pickle", "wb") as _model:
+        with open(f"pickles/{ARGS.name}.pickle", "wb") as _model:
             pickle.dump(nb_model, _model)
         with open("pickles/vectorizer.pickle", "wb") as _vectorizer:
             pickle.dump(vectorizer, _vectorizer)
@@ -245,18 +250,19 @@ class Model:
         """
         Predict the language of an inputted string using a trained model.
 
-        Args:
+        ARGS:
         - input_string (str): Text.
 
         Returns:
         - str: Predicted language.
         """
-        with open(f"pickles/{args.name}.pickle", "rb") as _nb_model:
+        with open(f"pickles/{ARGS.name}.pickle", "rb") as _nb_model:
             nb_model = pickle.load(_nb_model)
         with open("pickles/vectorizer.pickle", "rb") as _vectorizer:
             vectorizer = pickle.load(_vectorizer)
         with open("pickles/encoder.pickle", "rb") as _encoder:
             encoder = pickle.load(_encoder)
+        # Vectorize the input and then transform back the language encoding
         vectorized_input = vectorizer.transform([input_string]).toarray()
         lang = encoder.inverse_transform(nb_model.predict(vectorized_input))
         return lang[0]
@@ -266,25 +272,25 @@ class Model:
         Write training log to a csv file to compare results between
         different runs.
 
-        Args:
+        ARGS:
         - run_time (float): Training runtime.
         - precision (float): Precision score.
         - recall (float): Recall score.
         - f_score (float): F1 score.
         """
-        with open("pickles/data_args.pickle", "rb") as _data_args:
-            data_args = pickle.load(_data_args)
+        with open("pickles/data_ARGS.pickle", "rb") as _data_ARGS:
+            data_ARGS = pickle.load(_data_ARGS)
 
-        writing_args = [
-            args.name,
-            data_args.data,
+        writing_ARGS = [
+            ARGS.name,
+            data_ARGS.data,
             precision,
             recall,
             f_score,
             run_time,
-            args.features,
-            args.vectorizer,
-            args.classifier,
+            ARGS.features,
+            ARGS.vectorizer,
+            ARGS.classifier,
         ]
         # Check if the log file exists
         log_path = "log.csv"
@@ -303,11 +309,11 @@ class Model:
                     "Vectorizer",
                     "Classifier",
                 ])
-                csv_writer.writerow(writing_args)
+                csv_writer.writerow(writing_ARGS)
         else:
             with open(log_path, "a", encoding="utf-8", newline='') as _log:
                 csv_writer = csv.writer(_log)
-                csv_writer.writerow(writing_args)
+                csv_writer.writerow(writing_ARGS)
 
 
 if __name__ == "__main__":

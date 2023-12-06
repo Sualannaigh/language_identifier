@@ -63,7 +63,7 @@ parser.add_argument(
     default="model",
     help='Name of the model, default "model"',
 )
-args = parser.parse_args()
+ARGS = parser.parse_args()
 
 
 class Metrics:
@@ -86,17 +86,17 @@ class Metrics:
 
     def __init__(self) -> None:
         try:
-            self.data = Model.load_data(args.data)
+            self.data = Model.load_data(ARGS.data)
             with open("pickles/vectorizer.pickle", "rb") as vectorizer_file:
                 self.vectorizer = pickle.load(vectorizer_file)
             with open("pickles/categories.pickle", "rb") as categories_file:
                 self.categories = pickle.load(categories_file)
-            with open(f"pickles/{args.name}.pickle", "rb") as model_file:
+            with open(f"pickles/{ARGS.name}.pickle", "rb") as model_file:
                 self.model = pickle.load(model_file)
         except FileNotFoundError:
             print("To generate metrics you will need to train a model first.")
             sys.exit(1)
-        self.cross_validate(args.cross_validations)
+        self.cross_validate(ARGS.cross_validations)
         self.get_top_features()
 
     def cross_validate(self, k_validations: int) -> None:
@@ -104,7 +104,7 @@ class Metrics:
         Generates cross-validation scores for the language prediction model
         using k-fold cross-validation.
 
-        Args:
+        ARGS:
         - k_validations (int): How many validations will be evaluated.
         """
         print("Generating cross validation scores...")
