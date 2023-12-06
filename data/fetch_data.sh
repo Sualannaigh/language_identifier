@@ -4,7 +4,8 @@
 repositories=(
     "git@github.com:giellalt/corpus-fit.git"
     "git@github.com:giellalt/corpus-fin.git"
-    "git@github.com:giellalt/corpus-fit-x-closed.git" # This repository requires acess from giellatekno
+    # This repository requires acess from GiellaTekno's Github
+    #"git@github.com:giellalt/corpus-fit-x-closed.git"
 )
 
 mkdir meankieli/
