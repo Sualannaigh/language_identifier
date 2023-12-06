@@ -1,28 +1,28 @@
 * Table of contents
-- [[Introduction][Introduction]]
-- [[Getting started][Getting started]]
-- [[~data.py~][data.py]]
-- [[~model.py~][model.py]]
-- [[~demo.py~][demo.py]]
-- [[~metrics.py~][metrics.py]]
-- [[Adding corpus data manually][Adding corpus data manually]]
+- Introduction
+- Getting started
+- [[data.py][data.py]]
+- [[model.py][model.py]]
+- [[demo.py][demo.py]]
+- [[metrics.py][metrics.py]]
+- Adding corpus data manually
 
 * Introduction
 This repository contains a basic toolkit for building a language identication model capabable of distinguishing different languages, intially setup to identify Meäenkieli and Finnish. 
 
-The corpora used within this project are available to download from the group Giellatekno at the University of Tromsø. The Meänkieli corpus contains around 18 400 paragraphs of text in the public corpus whilst the Finnish corpus contains around 486 000, it is therefore recommended that you keep these numbers in mind when selecting how much data to include in your datasets as the size of the Meänkieli corpus is usually the limiting factor for how much data can be used in developing the model. It is also entirely possible to extend the model with additional languages available from GiellaTekno, read how [[Adding corpus data manually]["Adding corpus data manually"]].
+The corpora used within this project are available to download from the group Giellatekno at the University of Tromsø. The Meänkieli corpus contains around 18 400 paragraphs of text in the public corpus whilst the Finnish corpus contains around 486 000, it is therefore recommended that you keep these numbers in mind when selecting how much data to include in your datasets as the size of the Meänkieli corpus is usually the limiting factor for how much data can be used in developing the model. It is also entirely possible to extend the model with additional languages available from GiellaTekno, read how  in the section "Adding corpus data manually".
 
-All code in the project has been developed in and verified to work with Python version ~3.9.2~. The code tries to adhere to the style and formatting principles established put forth in [[https://peps.python.org/pep-0008/][PEP 8]], verified with the packages ~pylint~ and ~pycodestyle~. In a few instances the code slightly deviates from the standard [[https://peps.python.org/pep-0008/#a-foolish-consistency-is-the-hobgoblin-of-little-minds][for the sake of readability]] (primarily in regards to a line length 79 characters).
+All code in the project has been developed in and verified to work with Python version ~3.9.2~. The code tries to adhere to the style and formatting principles put forth in [[https://peps.python.org/pep-0008/][PEP 8]], verified with the packages ~pylint~ and ~pycodestyle~. In a few instances the code slightly deviates from the standard [[https://peps.python.org/pep-0008/#a-foolish-consistency-is-the-hobgoblin-of-little-minds][for the sake of readability]] (primarily in regards to a line length of 79 characters).
 
 * Getting started
 Below are a set of instructions for getting started. It is highly suggested that you also call each program with the help flag ~-h~ to get a more detailed list of what parameters it can be executed with.
 *** Walkthrough
 1. Install the Python packages listed in ~requirements.txt~ by running ~python -m pip install -r requirements.txt~. It is advised to install the packages and run the program in a virtual enviroment to avoid version conflicts with your global Python configuration.
-2. Download the corpus files by entering the folder ~/data~ and running the shellscript ~fetch_data.sh~, if you are unable to run shellscript refer to [[Adding corpus data manually]["Adding corpus data manually"]].
-3. Run the program ~data.py~ which will extract data from the downloaded corpora. You will be prompted whether you want to manually set what percentage of each language will be included in the training-testing dataset or if you want the program to create an equal split between all languages. See [[~data.py~]["data.py"]]
-4. Train the model with default settings by running ~model.py~ with the training flag ~-t~. This will by train the model on the dataset "dataset.csv" in the directory data generated in the previous step but can be manually set to any dataset prefered. See [[~model.py~]["model.py"]]
+2. Download the corpus files by entering the folder ~/data~ and running the shellscript ~fetch_data.sh~, if you are unable to run shellscript refer to the section "Adding corpus data manually".
+3. Run the program ~data.py~ which will extract data from the downloaded corpora. You will be prompted whether you want to manually set what percentage of each language will be included in the training-testing dataset or if you want the program to create an equal split between all languages. See [[data.py]["data.py"]]
+4. Train the model with default settings by running ~model.py~ with the training flag ~-t~. This will by train the model on the dataset "dataset.csv" in the directory data generated in the previous step but can be manually set to any dataset prefered. See [[model.py]["model.py"]]
 5. Now that you have trained a model you can predict text by running it with the argument ~-p~. Succesfully training a model also generates an entry in the csv file "log.csv" with metrics to track statistics over multiple runs of the program.
-6. (optional) Manually add files containing text to the directory ~/example_data~  and run ~demo.py~ to watch the model try to predict what language each of the files predominantly contains. See [[* ~demo.py~]["demo.py"]].
+6. (optional) Manually add files containing text to the directory ~/example_data~  and run ~demo.py~ to watch the model try to predict what language each of the files predominantly contains. See [[demo.py]["demo.py"]].
 *** Example usage
 Create a dataset with 40 000 lines and name it "large_dataset":
 
@@ -34,17 +34,17 @@ Train a model named "gaussian_5000" with a gaussian classifier, 5000 features an
 
 Predict inputed string, will print the guessed language:
 
-~python3 model.py -p "Kaks kissaa istu katola"~
+~python model.py -p oon~
 
 * ~data.py~
 This script collects and processes corpora files located in the directory "data" for further use in the script model.py. It creates a csv files located in the folder "data". The script works by extracting data in <p> tags found in the documents, so it will work with most xml files of similar structures.
 
 *** Selecting data
-When running the program you will be prompted to input what ratio of the languages you want to include in the final dataset, for a equal split between all languages press /enter/ or type /y/. If you want a different split you can instead enter /y/ and manually enter your desired split, if you want a split of 30% Meänkieli and 70% Finnish in the training data you would write first write 0.3 for Meänkieli and then 0.7 for Finnish.
+When running the program you will be prompted to input what ratio of the languages you want to include in the final dataset, for a equal split between all languages press /enter/ or type /n/. If you want a different split you can instead enter /y/ and manually enter your desired split, if you want a split of 30% Meänkieli and 70% Finnish in the training data you would write first write 0.3 for Meänkieli and then 0.7 for Finnish.
 
 *** Command-line arguments:
-  ~-s~, ~--size~: Lines of data to include in the model (for both languages). Default is 30 000 lines.
-  ~-d~, ~--data~: Sets the name for the dataset. Default is "datasheet".
+  + ~-s~, ~--size~: Lines of data to include in the model (for both languages). Default is 30 000 lines.
+  + ~-d~, ~--data~: Sets the name for the dataset. Default is "datasheet".
 
 *** Classes:
 - Gatherer: Represents a data gatherer for language identification.
@@ -55,42 +55,41 @@ Run this script to collect and process text data from xml files, creating a data
 *** Example:
 ~python3 data.py -s 50000 -d big_dataset~
 
-This will create a dataset named "big_dataset.csv" with 50000 lines of data.
+This will create a dataset named "big_dataset.csv" with 50 000 lines of data.
 
 * ~model.py~
 This script implements a naive bayesian classifier, with an interface for
 training the model and predicting inputed text using the model.
 
 *** Command-line arguments:
-  ~-d~, ~--data~: Location to where the CSV data will be read from. Default is "data/datasheet.csv".
-  ~-t~, ~--training~: Enables training for the model.
-  ~-n~, ~--name~: Name of the model. Default is "model".
-  ~-f~, ~--features~: Number of features the vocabulary for the vectorizer will use. Default is 5000 features.
-  ~-p~, ~--predict~: Use input to predict text using the model.
-  ~-v~, ~--vectorizer~: Sets the vectorizer method used for the program. Supported arguments are "tf" (TfidfVectorizer) and "cv" (CountVectorizer). Default is "cv".
-  ~-c~, ~--classifier~: Choose which of the Naive Bayesian classifiers the model will use. Supported arguments are "b" (Bernoulli), "g" (Gaussian), and "m" (Multinomial). Default is "m".
+  + ~-d~, ~--data~: Location to where the CSV data will be read from. Default is "data/datasheet.csv".
+  + ~-t~, ~--training~: Enables training for the model.
+  + ~-n~, ~--name~: Name of the model. Default is "model".
+  + ~-f~, ~--features~: Number of features the vocabulary for the vectorizer will use. Default is 5000 features.
+  + ~-p~, ~--predict~: Use input to predict text using the model.
+  + ~-v~, ~--vectorizer~: Sets the vectorizer method used for the program. Supported arguments are "tf" (TfidfVectorizer) and "cv" (CountVectorizer). Default is "cv".
+  + ~-c~, ~--classifier~: Choose which of the Naive Bayesian classifiers the model will use. Supported arguments are "b" (Bernoulli), "g" (Gaussian), and "m" (Multinomial). Default is "m".
 
 *** Classes:
-- Model: Represents the language identification model.
+- Model: Contains the methods for interacting with the language identification model
 
 *** Usage:
-Run this script to either train a new language identification model or predict
-language for a given input text.
+Run this script to either train a new language identification model or predict language for a given input text.
 
 *** Example:
 ~python3 model.py -t -f 5000 -c g -v tf -n gaussian_5000~
 * ~demo.py~
 This is a very short script to showcase the model being used "in-action" by loading in a saved model (with the name ~model.pickle~ located in the ~/pickles~ directory) and predicting the language of all the files located in the directory ~/example_data~.
 
-To use this script you will first have to follow the previous steps of [[* Getting started][training a model]].
+To use this script you will first have to follow the previous steps list in the section "Getting started".
 
 * ~metrics.py~
 This script generates metrics for evaluating the model for the generated language model. This script is still a WIP with few metrics generated and will mostly be used for generating graphs used in presenting the work.
 
 *** Command-line arguments:
-  -c, --cross_validations: Specifies how many k-fold validations will be calculated.
-  -d, --data: Location to where the csv data will be read from. Default is "data/datasheet.csv".
-  -n, --name: Name of the model. Default is "model".
+  + ~-c~, ~--cross_validations~: Specifies how many k-fold validations will be calculated.
+  + ~-d~, ~--data~: Location to where the csv data will be read from. Default is "data/datasheet.csv".
+  + ~-n~, ~--name~: Name of the model. Default is "model".
 
 *** Attributes:
 - data:  The loaded data for training and evaluation.
